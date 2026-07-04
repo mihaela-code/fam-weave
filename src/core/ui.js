@@ -31,3 +31,7 @@ export function renderNavbar(activePage = '') {
       </div>
     </nav>`;
 }
+
+export function showAlert(container, message, type = 'danger') {
+  container.innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
+}
