@@ -1,11 +1,15 @@
 import './core/bootstrap.js';
 import './styles/main.css';
 import { APP_NAME } from './core/config.js';
-import { renderNavbar, showAlert } from './core/ui.js';
-import { signIn } from './core/auth.js';
+import { mountNavbar, showAlert } from './core/ui.js';
+import { signIn, redirectIfAuthenticated } from './core/auth.js';
 
 document.title = `${APP_NAME} — Log In`;
-document.getElementById('navbar').innerHTML = renderNavbar();
+
+const session = await redirectIfAuthenticated();
+if (!session) {
+  mountNavbar(document.getElementById('navbar'));
+}
 
 const form = document.getElementById('loginForm');
 const alertContainer = document.getElementById('alertContainer');
