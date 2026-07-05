@@ -54,11 +54,15 @@
                     id="inviteCode"
                     name="inviteCode"
                     maxlength="8"
-                    disabled
                   />
                 </div>
-                <!-- Join-by-code is not wired up yet; ships in a follow-up commit. -->
-                <button type="submit" class="btn btn-secondary" id="joinFamilyBtn" disabled>
+                <button type="submit" class="btn btn-secondary" id="joinFamilyBtn">
+                  <span
+                    class="spinner-border spinner-border-sm d-none me-1"
+                    role="status"
+                    aria-hidden="true"
+                    id="joinFamilySpinner"
+                  ></span>
                   Присъедини се
                 </button>
               </form>

@@ -3,7 +3,7 @@ import '../styles/main.css';
 import { APP_NAME } from '../core/config.js';
 import { mountNavbar, showAlert } from '../core/ui.js';
 import { requireAuth, getMyFamily } from '../core/auth.js';
-import { createFamily } from '../services/family-service.js';
+import { createFamily, joinFamilyByCode } from '../services/family-service.js';
 
 document.title = `${APP_NAME} — Onboarding`;
 document.getElementById('pageTitle').textContent = `Добре дошли в ${APP_NAME}`;
@@ -52,6 +52,38 @@ if (session) {
         showAlert(alertContainer, error.message);
         createBtn.disabled = false;
         createSpinner.classList.add('d-none');
+      }
+    });
+
+    const joinForm = document.getElementById('joinFamilyForm');
+    const joinBtn = document.getElementById('joinFamilyBtn');
+    const joinSpinner = document.getElementById('joinFamilySpinner');
+
+    joinForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      alertContainer.innerHTML = '';
+
+      const code = document.getElementById('inviteCode').value.trim().toUpperCase();
+
+      if (code.length !== 8) {
+        showAlert(alertContainer, 'Кодът е 8 символа.');
+        return;
+      }
+
+      joinBtn.disabled = true;
+      joinSpinner.classList.remove('d-none');
+
+      try {
+        const family = await joinFamilyByCode(code);
+        showAlert(alertContainer, `Присъедини се към "${family.name}"!`, 'success');
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 2000);
+      } catch (error) {
+        console.error(error);
+        showAlert(alertContainer, error.message);
+        joinBtn.disabled = false;
+        joinSpinner.classList.add('d-none');
       }
     });
   }
