@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Onboarding</title>
+  </head>
+  <body>
+    <div id="navbar"></div>
+    <main class="container py-4">
+      <h1 id="pageTitle"></h1>
+      <div id="alertContainer"></div>
+      <div class="row g-4 mt-2">
+        <div class="col-12 col-md-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <h2 class="h5 card-title">Създай семейство</h2>
+              <form id="createFamilyForm" novalidate>
+                <div class="mb-3">
+                  <label for="familyName" class="form-label">Име на семейството</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="familyName"
+                    name="familyName"
+                    minlength="2"
+                    maxlength="50"
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary" id="createFamilyBtn">
+                  <span
+                    class="spinner-border spinner-border-sm d-none me-1"
+                    role="status"
+                    aria-hidden="true"
+                    id="createFamilySpinner"
+                  ></span>
+                  Създай семейство
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <div class="card h-100">
+            <div class="card-body">
+              <h2 class="h5 card-title">Присъедини се с код</h2>
+              <form id="joinFamilyForm" novalidate>
+                <div class="mb-3">
+                  <label for="inviteCode" class="form-label">Код за покана</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="inviteCode"
+                    name="inviteCode"
+                    maxlength="8"
+                    disabled
+                  />
+                </div>
+                <!-- Join-by-code is not wired up yet; ships in a follow-up commit. -->
+                <button type="submit" class="btn btn-secondary" id="joinFamilyBtn" disabled>
+                  Присъедини се
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="/src/pages/onboarding-page.js"></script>
+  </body>
+</html>

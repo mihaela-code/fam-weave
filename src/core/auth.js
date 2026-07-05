@@ -43,3 +43,38 @@ export async function redirectIfAuthenticated() {
   }
   return session;
 }
+
+export async function getMyFamily() {
+  const session = await getSession();
+  if (!session) return null;
+
+  const { data, error } = await supabase
+    .from('family_members')
+    .select('family_id, role, families(name)')
+    .eq('user_id', session.user.id)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  return {
+    family_id: data.family_id,
+    role: data.role,
+    family_name: data.families.name,
+  };
+}
+
+let cachedFamily = null;
+
+export async function requireFamily() {
+  if (cachedFamily) return cachedFamily;
+
+  const family = await getMyFamily();
+  if (!family) {
+    window.location.href = 'onboarding.html';
+    return null;
+  }
+
+  cachedFamily = family;
+  return cachedFamily;
+}

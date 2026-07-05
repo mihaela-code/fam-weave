@@ -10,6 +10,7 @@ export default defineConfig({
         index: page('index.html'),
         login: page('login.html'),
         register: page('register.html'),
+        onboarding: page('onboarding.html'),
         dashboard: page('dashboard.html'),
         calendar: page('calendar.html'),
         expenses: page('expenses.html'),
