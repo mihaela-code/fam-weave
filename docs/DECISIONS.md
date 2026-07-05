@@ -81,3 +81,13 @@ Short ADRs. Format: Context → Decision → Consequences. Newest entries append
 **Decision.** One generic `documents` metadata table (nullable `expense_id` in V1) + a single private Storage bucket with paths `family/{family_id}/...`; storage policies reuse the family-membership check on the path prefix.
 
 **Consequences.** V3 (warranties/vault) extends `documents` with new nullable FKs instead of new tables. Signed URLs serve downloads; nothing is public.
+
+---
+
+## ADR-009 — Invite code collision risk accepted
+
+**Context.** `generate_invite_code()` has no retry on unique violation — a collision would surface as a raw constraint error to the caller.
+
+**Decision.** Accept the risk. With 31^8 (~852 billion) combinations, collision probability is negligible at any realistic family count.
+
+**Consequences.** Retry logic is added only if the product outgrows this assumption. No code change needed in V1.
