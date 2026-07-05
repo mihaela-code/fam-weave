@@ -2,11 +2,15 @@ import './core/bootstrap.js';
 import './styles/main.css';
 import { APP_NAME } from './core/config.js';
 import { mountNavbar } from './core/ui.js';
-import { requireAuth } from './core/auth.js';
+import { requireAuth, requireFamily } from './core/auth.js';
 
 document.title = `${APP_NAME} — Dashboard`;
 
 const session = await requireAuth();
 if (session) {
-  mountNavbar(document.getElementById('navbar'), { activePage: 'dashboard', session });
+  const family = await requireFamily();
+  if (family) {
+    mountNavbar(document.getElementById('navbar'), { activePage: 'dashboard', session });
+    document.getElementById('familySubtitle').textContent = family.family_name;
+  }
 }
