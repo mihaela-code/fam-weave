@@ -3,7 +3,14 @@ import '../../styles/main.css';
 import { APP_NAME } from '../../core/config.js';
 import { mountNavbar, showAlert } from '../../core/ui.js';
 import { requireAuth, requireFamily } from '../../core/auth.js';
-import { getCategories, createCategory, getExpenses, createExpense } from '../../services/expense-service.js';
+import {
+  getCategories,
+  createCategory,
+  getExpenses,
+  createExpense,
+  updateExpense,
+  deleteExpense,
+} from '../../services/expense-service.js';
 
 document.title = `${APP_NAME} — Разходи`;
 
@@ -48,6 +55,10 @@ if (session) {
     const newCategoryConfirm = document.getElementById('newCategoryConfirm');
     const expensesTableBody = document.getElementById('expensesTableBody');
     const emptyState = document.getElementById('emptyState');
+    const actionsHeader = document.getElementById('actionsHeader');
+    const editWarning = document.getElementById('editWarning');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const addExpenseBtnLabel = document.getElementById('addExpenseBtnLabel');
 
     const currencyFormatter = new Intl.NumberFormat('bg-BG', {
       style: 'currency',
@@ -57,6 +68,39 @@ if (session) {
     const isParent = family.role === 'parent';
     if (isParent) {
       addExpenseSection.classList.remove('d-none');
+      actionsHeader.classList.remove('d-none');
+    }
+
+    let editingExpenseId = null;
+    let currentExpenses = [];
+
+    function showSuccessAlert(message) {
+      showAlert(alertContainer, message, 'success');
+      const el = alertContainer.firstElementChild;
+      setTimeout(() => {
+        if (el?.isConnected) {
+          el.remove();
+        }
+      }, 2500);
+    }
+
+    function enterEditMode(expense) {
+      editingExpenseId = expense.id;
+      categorySelect.value = expense.category_id;
+      amountInput.value = expense.amount;
+      descriptionInput.value = expense.description ?? '';
+      spentOnInput.value = expense.spent_on;
+      editWarning.classList.remove('d-none');
+      addExpenseBtnLabel.textContent = 'Запази';
+      addExpenseForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function exitEditMode() {
+      editingExpenseId = null;
+      addExpenseForm.reset();
+      spentOnInput.value = new Date().toISOString().slice(0, 10);
+      editWarning.classList.add('d-none');
+      addExpenseBtnLabel.textContent = 'Добави';
     }
 
     spentOnInput.value = new Date().toISOString().slice(0, 10);
@@ -73,6 +117,7 @@ if (session) {
 
     async function loadExpenses() {
       const expenses = await getExpenses(family.family_id);
+      currentExpenses = expenses;
 
       if (expenses.length === 0) {
         expensesTableBody.innerHTML = '';
@@ -82,15 +127,38 @@ if (session) {
 
       emptyState.classList.add('d-none');
       expensesTableBody.innerHTML = expenses
-        .map(
-          (expense) => `
+        .map((expense) => {
+          const actionsCell = isParent
+            ? `
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-secondary me-1 edit-expense-btn"
+                  data-id="${expense.id}"
+                  aria-label="Редактирай"
+                >
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger delete-expense-btn"
+                  data-id="${expense.id}"
+                  aria-label="Изтрий"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </td>`
+            : '';
+
+          return `
             <tr>
               <td>${expense.spent_on}</td>
               <td>${escapeHtml(expense.categories?.name ?? '')}</td>
               <td>${escapeHtml(expense.description ?? '')}</td>
               <td>${currencyFormatter.format(expense.amount)}</td>
-            </tr>`
-        )
+              ${actionsCell}
+            </tr>`;
+        })
         .join('');
     }
 
@@ -103,6 +171,41 @@ if (session) {
     }
 
     if (isParent) {
+      cancelEditBtn.addEventListener('click', () => {
+        exitEditMode();
+      });
+
+      expensesTableBody.addEventListener('click', async (event) => {
+        const editBtn = event.target.closest('.edit-expense-btn');
+        const deleteBtn = event.target.closest('.delete-expense-btn');
+
+        if (editBtn) {
+          const expense = currentExpenses.find((e) => e.id === editBtn.dataset.id);
+          if (expense) {
+            enterEditMode(expense);
+          }
+          return;
+        }
+
+        if (deleteBtn) {
+          const id = deleteBtn.dataset.id;
+          const confirmed = confirm('Сигурна ли си, че искаш да изтриеш този разход?');
+          if (!confirmed) return;
+
+          try {
+            await deleteExpense(id);
+            if (editingExpenseId === id) {
+              exitEditMode();
+            }
+            showSuccessAlert('Разходът беше изтрит.');
+            await loadExpenses();
+          } catch (error) {
+            console.error(error);
+            showAlert(alertContainer, mapError(error));
+          }
+        }
+      });
+
       newCategoryToggle.addEventListener('click', () => {
         newCategoryGroup.classList.toggle('d-none');
         newCategoryName.focus();
@@ -147,18 +250,23 @@ if (session) {
         addExpenseBtn.disabled = true;
         addExpenseSpinner.classList.remove('d-none');
 
-        try {
-          await createExpense({
-            familyId: family.family_id,
-            categoryId,
-            amount,
-            description: descriptionInput.value.trim(),
-            spentOn: spentOnInput.value,
-          });
+        const isEditing = editingExpenseId !== null;
+        const expenseData = {
+          categoryId,
+          amount,
+          description: descriptionInput.value.trim(),
+          spentOn: spentOnInput.value,
+        };
 
-          addExpenseForm.reset();
-          spentOnInput.value = new Date().toISOString().slice(0, 10);
-          showAlert(alertContainer, 'Разходът е добавен успешно.', 'success');
+        try {
+          if (isEditing) {
+            await updateExpense(editingExpenseId, expenseData);
+          } else {
+            await createExpense({ familyId: family.family_id, ...expenseData });
+          }
+
+          exitEditMode();
+          showSuccessAlert(isEditing ? 'Разходът е обновен.' : 'Разходът е добавен успешно.');
           await loadExpenses();
         } catch (error) {
           console.error(error);

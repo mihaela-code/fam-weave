@@ -15,6 +15,14 @@
       <div class="card mb-4 d-none" id="addExpenseSection">
         <div class="card-body">
           <h2 class="h5 card-title">Добави разход</h2>
+          <div
+            class="alert alert-warning d-none d-flex justify-content-between align-items-center"
+            id="editWarning"
+            role="alert"
+          >
+            <span>Редактираш съществуващ разход</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="cancelEditBtn">Откажи</button>
+          </div>
           <form id="addExpenseForm" novalidate>
             <div class="row g-3">
               <div class="col-12 col-md-6">
@@ -48,7 +56,7 @@
                 aria-hidden="true"
                 id="addExpenseSpinner"
               ></span>
-              Добави
+              <span id="addExpenseBtnLabel">Добави</span>
             </button>
           </form>
         </div>
@@ -61,6 +69,7 @@
             <th>Категория</th>
             <th>Описание</th>
             <th>Сума</th>
+            <th id="actionsHeader" class="d-none">Действия</th>
           </tr>
         </thead>
         <tbody id="expensesTableBody"></tbody>

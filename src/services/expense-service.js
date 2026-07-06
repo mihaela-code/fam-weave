@@ -35,6 +35,28 @@ export async function getExpenses(familyId) {
   return data;
 }
 
+export async function updateExpense(id, { categoryId, amount, description, spentOn }) {
+  const { data, error } = await supabase
+    .from('expenses')
+    .update({
+      category_id: categoryId,
+      amount,
+      description: description || null,
+      spent_on: spentOn,
+    })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteExpense(id) {
+  const { error } = await supabase.from('expenses').delete().eq('id', id);
+  if (error) throw error;
+}
+
 export async function createExpense({ familyId, categoryId, amount, description, spentOn }) {
   const {
     data: { session },
