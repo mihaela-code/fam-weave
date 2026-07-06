@@ -4,12 +4,68 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Expenses</title>
+    <title>Разходи</title>
   </head>
   <body>
     <div id="navbar"></div>
     <main class="container py-4">
-      <h1>Expenses</h1>
+      <h1>Разходи</h1>
+      <div id="alertContainer"></div>
+
+      <div class="card mb-4 d-none" id="addExpenseSection">
+        <div class="card-body">
+          <h2 class="h5 card-title">Добави разход</h2>
+          <form id="addExpenseForm" novalidate>
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label for="categorySelect" class="form-label">Категория</label>
+                <select class="form-select" id="categorySelect" required></select>
+                <button type="button" class="btn btn-link btn-sm px-0 mt-1" id="newCategoryToggle">
+                  + Нова категория
+                </button>
+                <div class="input-group input-group-sm mt-1 d-none" id="newCategoryGroup">
+                  <input type="text" class="form-control" id="newCategoryName" placeholder="Име на категория" />
+                  <button type="button" class="btn btn-outline-secondary" id="newCategoryConfirm">Добави</button>
+                </div>
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="amountInput" class="form-label">Сума</label>
+                <input type="number" class="form-control" id="amountInput" step="0.01" min="0.01" required />
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="descriptionInput" class="form-label">Описание</label>
+                <input type="text" class="form-control" id="descriptionInput" />
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="spentOnInput" class="form-label">Дата</label>
+                <input type="date" class="form-control" id="spentOnInput" required />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3" id="addExpenseBtn">
+              <span
+                class="spinner-border spinner-border-sm d-none me-1"
+                role="status"
+                aria-hidden="true"
+                id="addExpenseSpinner"
+              ></span>
+              Добави
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <table class="table table-striped" id="expensesTable">
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th>Категория</th>
+            <th>Описание</th>
+            <th>Сума</th>
+          </tr>
+        </thead>
+        <tbody id="expensesTableBody"></tbody>
+      </table>
+      <p class="text-muted d-none" id="emptyState">Няма записани разходи.</p>
     </main>
     <script type="module" src="/src/modules/expenses/expenses-page.js"></script>
   </body>
