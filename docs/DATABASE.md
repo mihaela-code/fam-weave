@@ -16,7 +16,7 @@ erDiagram
     categories ||--o{ expenses : "classifies"
     expenses ||--o{ documents : "has receipts"
     profiles ||--o{ events : "assigned_to"
-    profiles ||--o{ expenses : "paid_by"
+    profiles ||--o{ expenses : "created_by"
 
     profiles {
         uuid id PK "= auth.users.id"
@@ -44,7 +44,6 @@ erDiagram
         uuid id PK
         uuid family_id FK
         text name
-        text icon
         timestamptz created_at
     }
     events {
@@ -64,11 +63,9 @@ erDiagram
         uuid id PK
         uuid family_id FK
         uuid category_id FK
-        text title
         numeric amount
-        date expense_date
-        uuid paid_by FK
-        text notes
+        text description
+        date spent_on
         uuid created_by FK
         timestamptz created_at
     }
@@ -96,13 +93,13 @@ The tenant. `invite_code` is a short unique code (e.g. 8 chars) used for joining
 Junction table user↔family with `role` (`parent` | `child`). `UNIQUE (family_id, user_id)`. Role lives here — not on the profile — because role is family-scoped (ADR-004). V1 uses one family per user; the schema already supports several.
 
 ### categories
-Expense categories, **per family** (each family manages its own list). Seeded with sensible defaults (Food, Education, Sport, Health, Other) on family creation.
+Per-family expense categories: `id`, `family_id` FK → `families(id)` (`ON DELETE CASCADE`), `name`, `created_at`. `UNIQUE (family_id, name)` — each family manages its own list, no duplicates within a family. RLS follows the standard template: `SELECT` for any family member, `INSERT/UPDATE/DELETE` restricted to parents. Five defaults (`Храна`, `Сметки`, `Транспорт`, `Здраве`, `Друго`) are seeded per family rather than left empty — inserted by the `create_family` RPC at creation time, and backfilled for every family that already existed when migration 003 ran (ADR-011).
 
 ### events
 Calendar entries. `assigned_to` optionally points to the member the event concerns (child pickup, training). Times stored as local `date` + `time` columns — no timestamptz for user-facing scheduling, avoiding timezone-shift bugs.
 
 ### expenses
-`amount` is `numeric(10,2)`. `paid_by` references the paying member. Currency is a single family-wide assumption (EUR) in V1 — no per-row currency column until a real need appears.
+`id`, `family_id` FK → `families(id)` (`ON DELETE CASCADE`), `category_id` FK → `categories(id)` (`ON DELETE RESTRICT` — a category with logged expenses cannot be deleted, protecting expense history from silent loss), `amount` `numeric(10,2)` with `CHECK (amount > 0)`, `description` (optional), `spent_on` date (defaults to `current_date`), `created_by` FK → `profiles(id)`, `created_at`. Indexed on `(family_id, spent_on DESC)` for expense-list and monthly-summary queries. RLS follows the standard template: `SELECT` for any family member, `INSERT/UPDATE/DELETE` restricted to parents. Currency is a single family-wide assumption (EUR) in V1 — no per-row currency column until a real need appears (ADR-010).
 
 ### documents
 File metadata; binary lives in a Supabase Storage bucket under `family/{family_id}/...`. `expense_id` nullable: V1 attaches documents to expenses, but the table deliberately allows unattached documents so V3 (warranties, vault) extends it with new nullable FKs instead of a new table.
@@ -111,14 +108,14 @@ File metadata; binary lives in a Supabase Storage bucket under `family/{family_i
 
 - `profiles` 1—1 `auth.users`; `profiles` M—N `families` through `family_members`.
 - `families` 1—N `events`, `expenses`, `categories`, `documents`.
-- `categories` 1—N `expenses` (`ON DELETE SET NULL` so deleting a category never deletes expenses).
+- `categories` 1—N `expenses` (`ON DELETE RESTRICT` — deleting a category with logged expenses is blocked, not silently nulled).
 - `expenses` 1—N `documents` (`ON DELETE CASCADE` for the metadata; storage objects removed by the service).
 
 ## Indexes
 
 - Every FK column: `family_id` on all domain tables (the hot filter), `category_id`, `expense_id`, `user_id`.
 - `events (family_id, event_date)` — calendar month queries.
-- `expenses (family_id, expense_date)` — expense lists and monthly summaries.
+- `expenses (family_id, spent_on DESC)` — expense lists and monthly summaries.
 - `families (invite_code)` — unique index, join-by-code lookup.
 - `family_members (family_id, user_id)` — unique composite.
 

@@ -91,3 +91,23 @@ Short ADRs. Format: Context → Decision → Consequences. Newest entries append
 **Decision.** Accept the risk. With 31^8 (~852 billion) combinations, collision probability is negligible at any realistic family count.
 
 **Consequences.** Retry logic is added only if the product outgrows this assumption. No code change needed in V1.
+
+---
+
+## ADR-010 — Single currency (EUR) in V1
+
+**Context.** Bulgaria adopted the euro on 2026-01-01, and FamWeave targets a single-household, single-country use case in V1.
+
+**Decision.** Amounts are stored as plain `numeric(10,2)` with no currency column. The UI formats amounts via `Intl.NumberFormat('bg-BG', { style: 'currency', currency: 'EUR' })`.
+
+**Consequences.** Multi-currency support would require a schema migration (a `currency` column plus conversion handling) and is explicitly out of V1 scope.
+
+---
+
+## ADR-011 — Default expense categories seeded per family
+
+**Context.** A newly created family would otherwise start with an empty category list, forcing every family to create categories from scratch before logging a single expense.
+
+**Decision.** The `create_family` RPC seeds five default categories (`Храна`, `Сметки`, `Транспорт`, `Здраве`, `Друго`) for every new family, in addition to creating the family and its parent membership.
+
+**Consequences.** Better first-run UX — expenses can be logged immediately. Category list management (rename/delete) is deferred to the admin panel. Category deletion is blocked by `ON DELETE RESTRICT` on `expenses.category_id` while expenses still reference it, so a category in use cannot be silently removed.
