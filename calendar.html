@@ -12,6 +12,53 @@
       <h1>Calendar</h1>
       <div id="alertContainer"></div>
 
+      <div class="card mb-4 d-none" id="addEventSection">
+        <div class="card-body">
+          <h2 class="h5 card-title">Add Event</h2>
+          <div
+            class="alert alert-warning d-none d-flex justify-content-between align-items-center"
+            id="editWarning"
+            role="alert"
+          >
+            <span>Editing an existing event</span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="cancelEditBtn">Cancel</button>
+          </div>
+          <form id="eventForm" novalidate>
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label for="titleInput" class="form-label">Title</label>
+                <input type="text" class="form-control" id="titleInput" required />
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="locationInput" class="form-label">Location</label>
+                <input type="text" class="form-control" id="locationInput" />
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="startsAtInput" class="form-label">Start</label>
+                <input type="datetime-local" class="form-control" id="startsAtInput" required />
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="endsAtInput" class="form-label">End</label>
+                <input type="datetime-local" class="form-control" id="endsAtInput" />
+              </div>
+              <div class="col-12">
+                <label for="descriptionInput" class="form-label">Description</label>
+                <textarea class="form-control" id="descriptionInput" rows="2"></textarea>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3" id="addEventBtn">
+              <span
+                class="spinner-border spinner-border-sm d-none me-1"
+                role="status"
+                aria-hidden="true"
+                id="addEventSpinner"
+              ></span>
+              <span id="addEventBtnLabel">Add event</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
       <table class="table table-striped" id="eventsTable">
         <thead>
           <tr>
@@ -19,6 +66,7 @@
             <th>Title</th>
             <th>Location</th>
             <th>Description</th>
+            <th id="actionsHeader" class="d-none">Actions</th>
           </tr>
         </thead>
         <tbody id="eventsTableBody"></tbody>
