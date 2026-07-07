@@ -10,6 +10,20 @@
     <div id="navbar"></div>
     <main class="container py-4">
       <h1>Calendar</h1>
+      <div id="alertContainer"></div>
+
+      <table class="table table-striped" id="eventsTable">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Title</th>
+            <th>Location</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody id="eventsTableBody"></tbody>
+      </table>
+      <p class="text-muted d-none" id="emptyState">No upcoming events.</p>
     </main>
     <script type="module" src="/src/modules/calendar/calendar-page.js"></script>
   </body>
