@@ -57,6 +57,7 @@ Each module contains: `<name>-service.js` (data access), `<name>-page.js` (page 
   - `is_family_member(family_id)` — read access
   - `is_family_parent(family_id)` — write access / admin actions
 - Core tables (V1): `profiles`, `families`, `family_members`, `events`, `expenses`, `categories`, `documents`.
+- All DDL in migrations must be schema-qualified (create table public.events, alter table public.events ...). Applies from migration 004 onward; migrations 001-003 remain as executed.
 
 ## Roles & Permissions
 
