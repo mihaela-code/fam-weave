@@ -15,7 +15,7 @@ erDiagram
     families ||--o{ documents : "has"
     categories ||--o{ expenses : "classifies"
     expenses ||--o{ documents : "has receipts"
-    profiles ||--o{ events : "assigned_to"
+    profiles ||--o{ events : "created_by"
     profiles ||--o{ expenses : "created_by"
 
     profiles {
@@ -49,14 +49,12 @@ erDiagram
     events {
         uuid id PK
         uuid family_id FK
+        uuid created_by FK
         text title
         text description
-        date event_date
-        time start_time
-        time end_time
-        text location_text
-        uuid assigned_to FK
-        uuid created_by FK
+        timestamptz starts_at
+        timestamptz ends_at "nullable"
+        text location
         timestamptz created_at
     }
     expenses {
@@ -96,7 +94,7 @@ Junction table user↔family with `role` (`parent` | `child`). `UNIQUE (family_i
 Per-family expense categories: `id`, `family_id` FK → `families(id)` (`ON DELETE CASCADE`), `name`, `created_at`. `UNIQUE (family_id, name)` — each family manages its own list, no duplicates within a family. RLS follows the standard template: `SELECT` for any family member, `INSERT/UPDATE/DELETE` restricted to parents. Five defaults (`Храна`, `Сметки`, `Транспорт`, `Здраве`, `Друго`) are seeded per family rather than left empty — inserted by the `create_family` RPC at creation time, and backfilled for every family that already existed when migration 003 ran (ADR-011).
 
 ### events
-Calendar entries. `assigned_to` optionally points to the member the event concerns (child pickup, training). Times stored as local `date` + `time` columns — no timestamptz for user-facing scheduling, avoiding timezone-shift bugs.
+Calendar entries: `id`, `family_id` FK → `families(id)` (`ON DELETE CASCADE`), `created_by` FK → `profiles(id)`, `title` (`CHECK (char_length(trim(title)) > 0)`), `description` (optional), `starts_at` timestamptz, `ends_at` timestamptz (optional; `CHECK (ends_at IS NULL OR ends_at > starts_at)`, named `events_ends_after_starts`), `location` (optional), `created_at`. Indexed on `(family_id, starts_at)` for upcoming-event queries. RLS follows the standard template: `SELECT` for any family member, `INSERT/UPDATE/DELETE` restricted to parents; the `INSERT` policy additionally requires `created_by = auth.uid()`.
 
 ### expenses
 `id`, `family_id` FK → `families(id)` (`ON DELETE CASCADE`), `category_id` FK → `categories(id)` (`ON DELETE RESTRICT` — a category with logged expenses cannot be deleted, protecting expense history from silent loss), `amount` `numeric(10,2)` with `CHECK (amount > 0)`, `description` (optional), `spent_on` date (defaults to `current_date`), `created_by` FK → `profiles(id)`, `created_at`. Indexed on `(family_id, spent_on DESC)` for expense-list and monthly-summary queries. RLS follows the standard template: `SELECT` for any family member, `INSERT/UPDATE/DELETE` restricted to parents. Currency is a single family-wide assumption (EUR) in V1 — no per-row currency column until a real need appears (ADR-010).
@@ -114,7 +112,7 @@ File metadata; binary lives in a Supabase Storage bucket under `family/{family_i
 ## Indexes
 
 - Every FK column: `family_id` on all domain tables (the hot filter), `category_id`, `expense_id`, `user_id`.
-- `events (family_id, event_date)` — calendar month queries.
+- `events (family_id, starts_at)` — upcoming-events queries.
 - `expenses (family_id, spent_on DESC)` — expense lists and monthly summaries.
 - `families (invite_code)` — unique index, join-by-code lookup.
 - `family_members (family_id, user_id)` — unique composite.

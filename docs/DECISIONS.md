@@ -111,3 +111,23 @@ Short ADRs. Format: Context → Decision → Consequences. Newest entries append
 **Decision.** The `create_family` RPC seeds five default categories (`Храна`, `Сметки`, `Транспорт`, `Здраве`, `Друго`) for every new family, in addition to creating the family and its parent membership.
 
 **Consequences.** Better first-run UX — expenses can be logged immediately. Category list management (rename/delete) is deferred to the admin panel. Category deletion is blocked by `ON DELETE RESTRICT` on `expenses.category_id` while expenses still reference it, so a category in use cannot be silently removed.
+
+---
+
+## ADR-012 — Calendar shows upcoming events only
+
+**Context.** The calendar list needs a simple, unambiguous scope for V1 — a full monthly grid with past/future browsing is significantly more UI work than the exam timeline allows.
+
+**Decision.** The calendar page lists only events where `starts_at >= now()`. Events already in progress disappear from the list once they start — an accepted V1 simplification.
+
+**Consequences.** A monthly grid view and a past-events archive are V2 candidates. No schema change needed to support either later; both would read the same `events` table with a different query.
+
+---
+
+## ADR-013 — No recurrence, reminders, invitations, or all-day flag in V1
+
+**Context.** These are common calendar features, but each adds meaningful scope (recurrence rules, notification delivery, per-invitee RSVP state, date-only vs. datetime handling) beyond V1's timeline (per the Out of Scope list in `copilot-instructions.md`).
+
+**Decision.** None of these are built in V1. The `events` schema does not reserve columns for them.
+
+**Consequences.** They will arrive via new migrations when needed, following the same pattern as other deferred features (ADR-007, ADR-010) — no placeholder columns or dead code carried in the meantime.
