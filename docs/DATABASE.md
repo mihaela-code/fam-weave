@@ -119,7 +119,7 @@ File metadata; binary lives in a Supabase Storage bucket under `family/{family_i
 
 ## RLS
 
-Every table: RLS enabled, deny by default. Standard template per table — `SELECT` gated by `is_family_member(family_id)`, `INSERT/UPDATE/DELETE` gated by `is_family_parent(family_id)` — plus documented exceptions for `profiles`, `families`, `family_members` (see ARCHITECTURE.md, "RLS Philosophy").
+Every table: RLS enabled, deny by default. Standard template per table — `SELECT` gated by `is_family_member(family_id)`, `INSERT/UPDATE/DELETE` gated by `is_family_parent(family_id)` — plus documented exceptions for `profiles`, `families`, `family_members` (see ARCHITECTURE.md, "RLS Philosophy"). `profiles` carries two permissive `SELECT` policies that OR together: self-select (`id = auth.uid()`) and family-visibility (`profiles_select_family_members`, using `shares_family_with(id)`) — members of the same family can read each other's profiles (ADR-016).
 
 ## Storage
 

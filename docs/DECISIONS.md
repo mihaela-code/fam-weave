@@ -156,3 +156,13 @@ Short ADRs. Format: Context → Decision → Consequences. Newest entries append
 - **Error convention:** the exception message is prefixed `LAST_PARENT:` for substring-based error mapping in the UI, consistent with `INVALID_NAME`/`INVALID_CODE`/`ALREADY_MEMBER` elsewhere.
 
 **Consequences.** Verified with a live test in the Supabase SQL Editor as the `postgres` role — demoting the only parent of a family raised the exception. Any future code path that updates or deletes `family_members` (RPC, admin panel, dashboard) is covered automatically; no application-level check can be bypassed.
+
+---
+
+## ADR-016 — Profiles readable within a family
+
+**Context.** `profiles` had a single self-only `SELECT` policy (`id = auth.uid()`). The admin panel embeds `profiles` via `family_members` joins to show member names and avatars; PostgREST embeds respect the target table's RLS, so other members' profiles silently came back null. RLS correctly surfaced a visibility requirement no page had needed before.
+
+**Decision.** Add an additive `SELECT` policy `profiles_select_family_members` using a new helper `shares_family_with(uuid)` (`security definer`, pinned `search_path`, same pattern as `is_family_member`/`is_family_parent`). The self-select policy remains; permissive policies OR together.
+
+**Consequences.** Any current or future page (dashboard in Day 9) can embed family members' profiles without further policy work. Profiles remain invisible across family boundaries.
