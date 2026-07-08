@@ -10,6 +10,42 @@
     <div id="navbar"></div>
     <main class="container py-4">
       <h1>Profile</h1>
+      <div id="alertContainer"></div>
+
+      <div class="card" style="max-width: 480px">
+        <div class="card-body">
+          <h2 class="h5 card-title">Avatar</h2>
+          <div class="mb-3" style="width: 128px; height: 128px">
+            <img
+              src=""
+              alt="Avatar"
+              class="rounded-circle d-none"
+              style="width: 128px; height: 128px; object-fit: cover"
+              id="avatarImage"
+            />
+            <div
+              class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+              style="width: 128px; height: 128px; font-size: 2rem"
+              id="avatarPlaceholder"
+            ></div>
+          </div>
+          <form id="avatarForm" novalidate>
+            <div class="mb-3">
+              <label for="avatarFileInput" class="form-label">Choose image</label>
+              <input type="file" class="form-control" id="avatarFileInput" accept="image/*" />
+            </div>
+            <button type="submit" class="btn btn-primary" id="uploadAvatarBtn">
+              <span
+                class="spinner-border spinner-border-sm d-none me-1"
+                role="status"
+                aria-hidden="true"
+                id="uploadAvatarSpinner"
+              ></span>
+              Upload
+            </button>
+          </form>
+        </div>
+      </div>
     </main>
     <script type="module" src="/src/profile.js"></script>
   </body>
