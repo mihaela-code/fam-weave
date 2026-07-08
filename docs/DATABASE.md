@@ -88,7 +88,7 @@ Extends `auth.users` 1:1 (same `id`). Created automatically by a trigger on user
 The tenant. `invite_code` is a short unique code (e.g. 8 chars) used for joining; regenerate-able by a parent. `created_by` references the founding user.
 
 ### family_members
-Junction table user↔family with `role` (`parent` | `child`). `UNIQUE (family_id, user_id)`. Role lives here — not on the profile — because role is family-scoped (ADR-004). V1 uses one family per user; the schema already supports several.
+Junction table user↔family with `role` (`parent` | `child`). `UNIQUE (family_id, user_id)`. Role lives here — not on the profile — because role is family-scoped (ADR-004). V1 uses one family per user; the schema already supports several. Protected by trigger `trg_last_parent_protection`, which blocks demoting or deleting a family's last parent (ADR-015); it skips the check during the `families` row's own `ON DELETE CASCADE`, and takes a per-family advisory lock to serialize concurrent role changes.
 
 ### categories
 Per-family expense categories: `id`, `family_id` FK → `families(id)` (`ON DELETE CASCADE`), `name`, `created_at`. `UNIQUE (family_id, name)` — each family manages its own list, no duplicates within a family. RLS follows the standard template: `SELECT` for any family member, `INSERT/UPDATE/DELETE` restricted to parents. Five defaults (`Храна`, `Сметки`, `Транспорт`, `Здраве`, `Друго`) are seeded per family rather than left empty — inserted by the `create_family` RPC at creation time, and backfilled for every family that already existed when migration 003 ran (ADR-011).

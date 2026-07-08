@@ -141,3 +141,18 @@ Short ADRs. Format: Context → Decision → Consequences. Newest entries append
 **Decision.** Avatars are the V1 file upload/download feature; receipts/documents are deferred to V3. Files live in a public bucket `avatars`, path convention `{user_id}/avatar.{ext}`. Write access is restricted per-user via RLS on `storage.objects` using `(storage.foldername(name))[1] = auth.uid()::text`. The broad `SELECT` (list) policy is kept deliberately despite the Supabase dashboard's warning about it: exposure is limited to user-id folder names (no other row data), avatars are public by design, and removing the policy via the dashboard would desync the live schema from migration 005. `profiles.avatar_url` stores the full public URL with a `?v=<timestamp>` cache-busting parameter, so every page shows the fresh image immediately after re-upload. On upload, stale avatar files with other extensions are removed first, to avoid orphaned files from format changes. Client-side validation: `image/*` MIME type, max 2MB, extension whitelist (`jpg`, `jpeg`, `png`, `webp`, `gif`) — SVG is deliberately excluded (XSS risk via inline scripts in SVG markup).
 
 **Consequences.** Receipt upload (ADR-008's private, family-scoped bucket) is built later in V3 as a separate bucket with different RLS (family membership, not per-user ownership) — the two features don't share policies or path conventions. The cache-busting query param means `avatar_url` values are not stable identifiers; anything that needs to compare "same avatar" must strip the query string first.
+
+---
+
+## ADR-015 — Last-parent protection at database level
+
+**Context.** A parent could demote themselves (or another parent) to child, or delete the last remaining parent's `family_members` row, leaving a family with no one able to manage members, roles, and invites.
+
+**Decision.** Enforce the invariant "every family has at least one parent" with a `BEFORE UPDATE OF role OR DELETE` trigger on `family_members` (function `public.assert_not_last_parent`, `security definer`, pinned `search_path`). UI restrictions are convenience; the database is the security boundary.
+
+**Details.**
+- **Cascade guard:** the check is skipped when the corresponding `families` row is already gone, so `ON DELETE CASCADE` family deletion still works.
+- **Advisory lock:** a transaction-scoped advisory lock keyed on `family_id` (`pg_advisory_xact_lock(hashtext(family_id::text))`) serializes concurrent role changes, closing the race where two parents demote themselves simultaneously and each transaction counts the other as the remaining parent.
+- **Error convention:** the exception message is prefixed `LAST_PARENT:` for substring-based error mapping in the UI, consistent with `INVALID_NAME`/`INVALID_CODE`/`ALREADY_MEMBER` elsewhere.
+
+**Consequences.** Verified with a live test in the Supabase SQL Editor as the `postgres` role — demoting the only parent of a family raised the exception. Any future code path that updates or deletes `family_members` (RPC, admin panel, dashboard) is covered automatically; no application-level check can be bypassed.
