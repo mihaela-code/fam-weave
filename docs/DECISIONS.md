@@ -131,3 +131,13 @@ Short ADRs. Format: Context → Decision → Consequences. Newest entries append
 **Decision.** None of these are built in V1. The `events` schema does not reserve columns for them.
 
 **Consequences.** They will arrive via new migrations when needed, following the same pattern as other deferred features (ADR-007, ADR-010) — no placeholder columns or dead code carried in the meantime.
+
+---
+
+## ADR-014 — Avatar storage via Supabase Storage
+
+**Context.** The exam requires a file upload/download feature. Receipts (`documents`, ADR-008) are the obvious V1 candidate by product scope, but avatars are simpler to implement end-to-end (single file per user, no parent/child gating) and exercise the same Storage + RLS mechanics the grading criteria care about.
+
+**Decision.** Avatars are the V1 file upload/download feature; receipts/documents are deferred to V3. Files live in a public bucket `avatars`, path convention `{user_id}/avatar.{ext}`. Write access is restricted per-user via RLS on `storage.objects` using `(storage.foldername(name))[1] = auth.uid()::text`. The broad `SELECT` (list) policy is kept deliberately despite the Supabase dashboard's warning about it: exposure is limited to user-id folder names (no other row data), avatars are public by design, and removing the policy via the dashboard would desync the live schema from migration 005. `profiles.avatar_url` stores the full public URL with a `?v=<timestamp>` cache-busting parameter, so every page shows the fresh image immediately after re-upload. On upload, stale avatar files with other extensions are removed first, to avoid orphaned files from format changes. Client-side validation: `image/*` MIME type, max 2MB, extension whitelist (`jpg`, `jpeg`, `png`, `webp`, `gif`) — SVG is deliberately excluded (XSS risk via inline scripts in SVG markup).
+
+**Consequences.** Receipt upload (ADR-008's private, family-scoped bucket) is built later in V3 as a separate bucket with different RLS (family membership, not per-user ownership) — the two features don't share policies or path conventions. The cache-busting query param means `avatar_url` values are not stable identifiers; anything that needs to compare "same avatar" must strip the query string first.

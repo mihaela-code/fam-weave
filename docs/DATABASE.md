@@ -82,7 +82,7 @@ erDiagram
 ## Tables
 
 ### profiles
-Extends `auth.users` 1:1 (same `id`). Created automatically by a trigger on user sign-up. Holds display data: name, birth date (used to suggest a default role for minors), avatar URL (Storage path), personal color used across calendar and expense views.
+Extends `auth.users` 1:1 (same `id`). Created automatically by a trigger on user sign-up. Holds display data: name, birth date (used to suggest a default role for minors), avatar URL (full public URL, see Storage section), personal color used across calendar and expense views.
 
 ### families
 The tenant. `invite_code` is a short unique code (e.g. 8 chars) used for joining; regenerate-able by a parent. `created_by` references the founding user.
@@ -120,6 +120,16 @@ File metadata; binary lives in a Supabase Storage bucket under `family/{family_i
 ## RLS
 
 Every table: RLS enabled, deny by default. Standard template per table — `SELECT` gated by `is_family_member(family_id)`, `INSERT/UPDATE/DELETE` gated by `is_family_parent(family_id)` — plus documented exceptions for `profiles`, `families`, `family_members` (see ARCHITECTURE.md, "RLS Philosophy").
+
+## Storage
+
+- **Bucket `avatars`** (public), created in migration 005. Path convention: `{user_id}/avatar.{ext}`, `ext` restricted client-side to `jpg`, `jpeg`, `png`, `webp`, `gif`.
+- **RLS policies on `storage.objects`**, scoped to `bucket_id = 'avatars'`, ownership checked via `(storage.foldername(name))[1] = auth.uid()::text` (the first path segment, i.e. the uploading user's id):
+  - `avatars_select_public` — anyone can read any file in the bucket (public avatars; no `to` role restriction).
+  - `avatars_insert_own` — `authenticated` users may upload only into their own `{user_id}/` folder.
+  - `avatars_update_own` — `authenticated` users may update only their own files.
+  - `avatars_delete_own` — `authenticated` users may delete only their own files.
+- **`profiles.avatar_url`** stores the full public URL returned by `storage.from('avatars').getPublicUrl(...)`, with a `?v=<timestamp>` cache-busting query param appended on every upload (ADR-014).
 
 ## Future Extensibility
 
