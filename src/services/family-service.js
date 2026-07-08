@@ -32,3 +32,38 @@ export async function joinFamilyByCode(code) {
 
   return data;
 }
+
+export async function getFamily(familyId) {
+  const { data, error } = await supabase.from('families').select('name, invite_code').eq('id', familyId).single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getFamilyMembers(familyId) {
+  const { data, error } = await supabase
+    .from('family_members')
+    .select('id, user_id, role, joined_at, profiles(display_name, avatar_url)')
+    .eq('family_id', familyId)
+    .order('joined_at', { ascending: true });
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updateMemberRole(memberId, newRole) {
+  const { data, error } = await supabase
+    .from('family_members')
+    .update({ role: newRole })
+    .eq('id', memberId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function removeMember(memberId) {
+  const { error } = await supabase.from('family_members').delete().eq('id', memberId);
+  if (error) throw error;
+}

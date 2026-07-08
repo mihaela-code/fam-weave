@@ -48,7 +48,11 @@ const session = await requireAuth();
 if (session) {
   const family = await requireFamily();
   if (family) {
-    mountNavbar(document.getElementById('navbar'), { activePage: 'calendar', session });
+    mountNavbar(document.getElementById('navbar'), {
+      activePage: 'calendar',
+      session,
+      isParent: family.role === 'parent',
+    });
 
     const alertContainer = document.getElementById('alertContainer');
     const addEventSection = document.getElementById('addEventSection');

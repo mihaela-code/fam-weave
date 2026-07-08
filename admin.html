@@ -9,8 +9,46 @@
   <body>
     <div id="navbar"></div>
     <main class="container py-4">
-      <h1>Admin</h1>
+      <h1>Админ</h1>
+      <div id="alertContainer"></div>
+
+      <div class="mb-4">
+        <h2 class="h4" id="familyNameHeading"></h2>
+        <div>
+          <span class="text-muted">Код за покана:</span>
+          <span class="badge bg-secondary font-monospace fs-6" id="inviteCodeBadge"></span>
+        </div>
+      </div>
+
+      <table class="table table-striped align-middle" id="membersTable">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Име</th>
+            <th>Роля</th>
+            <th>Присъединил се на</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody id="membersTableBody"></tbody>
+      </table>
+
+      <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="confirmModalTitle">Потвърдете</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="confirmModalBody"></div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отказ</button>
+              <button type="button" class="btn btn-danger" id="confirmModalConfirmBtn">Потвърди</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
-    <script type="module" src="/src/modules/admin/admin-page.js"></script>
+    <script type="module" src="/src/pages/admin-page.js"></script>
   </body>
 </html>
