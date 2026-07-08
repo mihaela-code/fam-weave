@@ -25,18 +25,20 @@ const NAV_LINKS = [
   { id: 'dashboard', label: 'Dashboard', href: 'dashboard.html' },
   { id: 'calendar', label: 'Calendar', href: 'calendar.html' },
   { id: 'expenses', label: 'Expenses', href: 'expenses.html' },
-  { id: 'admin', label: 'Admin', href: 'admin.html' },
+  { id: 'admin', label: 'Админ', href: 'admin.html', parentOnly: true },
   { id: 'profile', label: 'Profile', href: 'profile.html' },
 ];
 
-export function renderNavbar(activePage = '', hasSession = false) {
+export function renderNavbar(activePage = '', hasSession = false, isParent = false) {
   const navItems = hasSession
-    ? NAV_LINKS.map(
-        (link) => `
+    ? NAV_LINKS.filter((link) => !link.parentOnly || isParent)
+        .map(
+          (link) => `
       <li class="nav-item">
         <a class="nav-link${link.id === activePage ? ' active' : ''}" href="${link.href}">${link.label}</a>
       </li>`
-      ).join('')
+        )
+        .join('')
     : '';
 
   const authControls = hasSession
@@ -76,8 +78,8 @@ export function renderNavbar(activePage = '', hasSession = false) {
     </nav>`;
 }
 
-export function mountNavbar(container, { activePage = '', session = null } = {}) {
-  container.innerHTML = renderNavbar(activePage, Boolean(session));
+export function mountNavbar(container, { activePage = '', session = null, isParent = false } = {}) {
+  container.innerHTML = renderNavbar(activePage, Boolean(session), isParent);
 
   const logoutBtn = container.querySelector('#logoutBtn');
   if (logoutBtn) {

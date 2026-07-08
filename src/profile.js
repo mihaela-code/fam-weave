@@ -33,7 +33,11 @@ const session = await requireAuth();
 if (session) {
   const family = await requireFamily();
   if (family) {
-    mountNavbar(document.getElementById('navbar'), { activePage: 'profile', session });
+    mountNavbar(document.getElementById('navbar'), {
+      activePage: 'profile',
+      session,
+      isParent: family.role === 'parent',
+    });
 
     const alertContainer = document.getElementById('alertContainer');
     const avatarImage = document.getElementById('avatarImage');
