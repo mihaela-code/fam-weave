@@ -1,9 +1,9 @@
 import './core/bootstrap.js';
 import './styles/main.css';
 import { APP_NAME } from './core/config.js';
-import { mountNavbar, showAlert } from './core/ui.js';
+import { mountNavbar, showAlert, getInitials } from './core/ui.js';
 import { requireAuth, requireFamily } from './core/auth.js';
-import { getProfile, uploadAvatar } from './services/profile-service.js';
+import { getProfile, uploadAvatar, downloadAvatar } from './services/profile-service.js';
 
 document.title = `${APP_NAME} — Profile`;
 
@@ -23,14 +23,10 @@ function mapError() {
 const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
 
-function getInitials(displayName) {
-  if (!displayName) return '?';
-  return displayName
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('');
+function getExtensionFromAvatarUrl(avatarUrl) {
+  const withoutQuery = avatarUrl.split('?')[0];
+  const ext = withoutQuery.split('.').pop();
+  return ext ? ext.toLowerCase() : null;
 }
 
 const session = await requireAuth();
@@ -46,16 +42,24 @@ if (session) {
     const avatarFileInput = document.getElementById('avatarFileInput');
     const uploadAvatarBtn = document.getElementById('uploadAvatarBtn');
     const uploadAvatarSpinner = document.getElementById('uploadAvatarSpinner');
+    const downloadAvatarBtn = document.getElementById('downloadAvatarBtn');
+    const downloadAvatarSpinner = document.getElementById('downloadAvatarSpinner');
+
+    let currentAvatarUrl = null;
 
     function renderAvatar(avatarUrl, displayName) {
+      currentAvatarUrl = avatarUrl || null;
+
       if (avatarUrl) {
         avatarImage.src = avatarUrl;
         avatarImage.classList.remove('d-none');
         avatarPlaceholder.classList.add('d-none');
+        downloadAvatarBtn.classList.remove('d-none');
       } else {
         avatarImage.classList.add('d-none');
         avatarPlaceholder.classList.remove('d-none');
         avatarPlaceholder.innerHTML = escapeHtml(getInitials(displayName));
+        downloadAvatarBtn.classList.add('d-none');
       }
     }
 
@@ -106,6 +110,37 @@ if (session) {
       } finally {
         uploadAvatarBtn.disabled = false;
         uploadAvatarSpinner.classList.add('d-none');
+      }
+    });
+
+    downloadAvatarBtn.addEventListener('click', async () => {
+      if (!currentAvatarUrl) return;
+
+      const ext = getExtensionFromAvatarUrl(currentAvatarUrl);
+      if (!ext) {
+        showAlert(alertContainer, mapError());
+        return;
+      }
+
+      downloadAvatarBtn.disabled = true;
+      downloadAvatarSpinner.classList.remove('d-none');
+
+      try {
+        const blob = await downloadAvatar(session.user.id, ext);
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = `avatar.${ext}`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(objectUrl);
+      } catch (error) {
+        console.error(error);
+        showAlert(alertContainer, mapError(error));
+      } finally {
+        downloadAvatarBtn.disabled = false;
+        downloadAvatarSpinner.classList.add('d-none');
       }
     });
   }

@@ -33,3 +33,12 @@ export async function uploadAvatar(userId, file, ext) {
 
   return avatarUrl;
 }
+
+export async function downloadAvatar(userId, ext) {
+  const path = `${userId}/avatar.${ext}`;
+
+  const { data, error } = await supabase.storage.from('avatars').download(path);
+  if (error) throw error;
+
+  return data;
+}

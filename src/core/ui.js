@@ -1,5 +1,25 @@
 import { APP_NAME } from './config.js';
 import { signOut } from './auth.js';
+import { getProfile } from '../services/profile-service.js';
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+export function getInitials(displayName) {
+  if (!displayName) return '?';
+  return displayName
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('');
+}
 
 const NAV_LINKS = [
   { id: 'dashboard', label: 'Dashboard', href: 'dashboard.html' },
@@ -20,7 +40,22 @@ export function renderNavbar(activePage = '', hasSession = false) {
     : '';
 
   const authControls = hasSession
-    ? `<a class="btn btn-outline-light" id="logoutBtn" href="#">Log out</a>`
+    ? `
+      <a href="profile.html" class="me-2 text-decoration-none" id="navbarAvatarLink" aria-label="Profile">
+        <span
+          class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center"
+          style="width: 32px; height: 32px; font-size: 0.8rem"
+          id="navbarAvatarPlaceholder"
+        >?</span>
+        <img
+          src=""
+          alt="Avatar"
+          class="rounded-circle d-none"
+          style="width: 32px; height: 32px; object-fit: cover"
+          id="navbarAvatarImage"
+        />
+      </a>
+      <a class="btn btn-outline-light" id="logoutBtn" href="#">Log out</a>`
     : `
       <a class="btn btn-outline-light me-2" href="login.html">Log In</a>
       <a class="btn btn-light" href="register.html">Register</a>`;
@@ -51,6 +86,29 @@ export function mountNavbar(container, { activePage = '', session = null } = {})
       await signOut();
       window.location.href = 'login.html';
     });
+  }
+
+  if (session) {
+    loadNavbarAvatar(container, session);
+  }
+}
+
+async function loadNavbarAvatar(container, session) {
+  const avatarImage = container.querySelector('#navbarAvatarImage');
+  const avatarPlaceholder = container.querySelector('#navbarAvatarPlaceholder');
+  if (!avatarImage || !avatarPlaceholder) return;
+
+  try {
+    const profile = await getProfile(session.user.id);
+    if (profile.avatar_url) {
+      avatarImage.src = profile.avatar_url;
+      avatarImage.classList.remove('d-none');
+      avatarPlaceholder.classList.add('d-none');
+    } else {
+      avatarPlaceholder.innerHTML = escapeHtml(getInitials(profile.display_name));
+    }
+  } catch (error) {
+    console.error(error);
   }
 }
 
