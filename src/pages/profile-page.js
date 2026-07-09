@@ -1,9 +1,9 @@
-import './core/bootstrap.js';
-import './styles/main.css';
-import { APP_NAME } from './core/config.js';
-import { mountNavbar, showAlert, getInitials } from './core/ui.js';
-import { requireAuth, requireFamily } from './core/auth.js';
-import { getProfile, uploadAvatar, downloadAvatar } from './services/profile-service.js';
+import '../core/bootstrap.js';
+import '../styles/main.css';
+import { APP_NAME } from '../core/config.js';
+import { mountNavbar, showAlert, getInitials } from '../core/ui.js';
+import { requireAuth, requireFamily } from '../core/auth.js';
+import { getProfile, uploadAvatar, downloadAvatar } from '../services/profile-service.js';
 
 document.title = `${APP_NAME} — Profile`;
 

@@ -1,9 +1,9 @@
-import '../../core/bootstrap.js';
-import '../../styles/main.css';
-import { APP_NAME } from '../../core/config.js';
-import { mountNavbar, showAlert } from '../../core/ui.js';
-import { requireAuth, requireFamily } from '../../core/auth.js';
-import { getEvents, createEvent, updateEvent, deleteEvent } from '../../services/event-service.js';
+import '../core/bootstrap.js';
+import '../styles/main.css';
+import { APP_NAME } from '../core/config.js';
+import { mountNavbar, showAlert } from '../core/ui.js';
+import { requireAuth, requireFamily } from '../core/auth.js';
+import { getEvents, createEvent, updateEvent, deleteEvent } from '../services/event-service.js';
 
 document.title = `${APP_NAME} — Calendar`;
 
