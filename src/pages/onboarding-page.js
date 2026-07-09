@@ -1,7 +1,7 @@
 import '../core/bootstrap.js';
 import '../styles/main.css';
 import { APP_NAME } from '../core/config.js';
-import { mountNavbar, showAlert } from '../core/ui.js';
+import { mountNavbar, showAlert, escapeHtml } from '../core/ui.js';
 import { requireAuth, getMyFamily } from '../core/auth.js';
 import { createFamily, joinFamilyByCode } from '../services/family-service.js';
 
@@ -23,6 +23,8 @@ if (session) {
     const createBtn = document.getElementById('createFamilyBtn');
     const createSpinner = document.getElementById('createFamilySpinner');
 
+    document.getElementById('onboardingContent').classList.remove('d-none');
+
     createForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       alertContainer.innerHTML = '';
@@ -39,14 +41,29 @@ if (session) {
 
       try {
         const family = await createFamily(name);
-        showAlert(
-          alertContainer,
-          `Семейството е създадено! Код за покана: ${family.invite_code}`,
-          'success'
-        );
-        setTimeout(() => {
-          window.location.href = 'dashboard.html';
-        }, 3000);
+
+        alertContainer.innerHTML = `
+          <div class="alert alert-success" role="alert">
+            <p class="mb-2">Семейството е създадено! Код за покана:</p>
+            <div class="d-flex align-items-center gap-2">
+              <code id="inviteCodeValue">${escapeHtml(family.invite_code)}</code>
+              <button type="button" class="btn btn-sm btn-outline-success" id="copyInviteCodeBtn">Копирай</button>
+            </div>
+            <a href="dashboard.html" class="btn btn-success btn-sm mt-3">Към таблото</a>
+          </div>`;
+
+        const copyInviteCodeBtn = document.getElementById('copyInviteCodeBtn');
+        copyInviteCodeBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(family.invite_code);
+            copyInviteCodeBtn.textContent = 'Копирано!';
+            copyInviteCodeBtn.disabled = true;
+          } catch (error) {
+            console.error(error);
+          }
+        });
+
+        document.getElementById('onboardingContent').classList.add('d-none');
       } catch (error) {
         console.error(error);
         showAlert(alertContainer, error.message);
