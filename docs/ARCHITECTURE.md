@@ -8,7 +8,7 @@ Multi-page web application: Vanilla JS (ES modules) + Bootstrap 5, built with Vi
 Browser (HTML pages + page scripts)
         │  calls
         ▼
-Service layer (src/modules/*/**-service.js)
+Service layer (src/services/*-service.js)
         │  only layer allowed to import
         ▼
 Supabase client (src/core/supabase.js)
@@ -31,29 +31,32 @@ Supabase: Postgres (RLS) · Auth · Storage
 │   │   ├── config.js                 # APP_NAME and app-level constants
 │   │   ├── supabase.js               # singleton client
 │   │   ├── auth.js                   # session, guards, current user/family/role
-│   │   └── ui.js                     # toasts, formatters, confirm dialogs
-│   ├── modules/
-│   │   ├── family/                   # families, members, invites, roles
-│   │   ├── calendar/                 # events
-│   │   ├── expenses/                 # expenses, categories, receipts
-│   │   └── admin/                    # member & role management
+│   │   └── ui.js                     # navbar, escapeHtml, showAlert, getInitials
+│   ├── services/                     # data access — the only files importing supabase.js
+│   │   ├── family-service.js
+│   │   ├── event-service.js
+│   │   ├── expense-service.js
+│   │   └── profile-service.js
+│   ├── pages/                        # one <name>-page.js per HTML entry point
 │   └── styles/
 ├── *.html                            # one file per screen (Vite entries)
 └── vite.config.js
 ```
 
+(ADR-017: this replaces an earlier, inconsistent mix of `src/*.js`, `src/modules/<domain>/`, and `src/pages/`.)
+
 ## Module Boundaries
 
-- A **module** = one domain folder under `src/modules/` containing its service(s), page logic, and components.
-- Modules may import from `core/` freely.
-- Modules must **not** import from other modules' internals. If two modules need the same logic, it moves to `core/` or the owning module exposes it via its service.
-- Adding a future module (e.g. `inventory/` in V2) means: new folder + new HTML pages + new migration. Zero edits to existing modules.
+- A **domain** is represented by a `<name>-service.js` in `src/services/` plus one or more `<name>-page.js` files in `src/pages/` — there is no domain folder grouping them.
+- Page scripts may import from `core/` and from `services/` freely.
+- Services must **not** import from other services or from `pages/`. If two domains need the same logic, it moves to `core/` or the owning service exposes it as a function the other page/service calls.
+- Adding a future domain (e.g. `inventory` in V2) means: new `<name>-service.js` in `services/`, new `<name>-page.js` in `pages/`, new HTML page, new migration. Zero edits to existing services or pages.
 
 ## Service Layer
 
-- Every module exposes `<domain>-service.js` — the only files that import `core/supabase.js`.
+- Every domain has a `<name>-service.js` in `src/services/` — the only files that import `core/supabase.js`.
 - Services return plain data (or throw); they contain all queries, storage calls, and data shaping.
-- Page scripts (`<domain>-page.js`) handle DOM, events, and rendering; they call services and `core/ui.js` helpers.
+- Page scripts (`src/pages/<name>-page.js`) handle DOM, events, and rendering; they call services and `core/ui.js` helpers.
 - Rationale: V4 AI features and any future UI migration reuse services untouched (ADR-002).
 
 ## Routing (Multi-Page)

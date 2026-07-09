@@ -31,19 +31,20 @@ FamWeave is a multi-tenant family organizer SaaS. Version 1 (current scope): **F
 │   ├── core/                # shared infrastructure
 │   │   ├── supabase.js      # Supabase client (env vars, singleton)
 │   │   ├── auth.js          # session helpers, route guard, current user/family
-│   │   └── ui.js            # shared UI helpers (toasts, formatters, confirm dialogs)
-│   ├── modules/             # one folder per domain module
-│   │   ├── family/          # families, members, invites, roles
-│   │   ├── calendar/        # events CRUD
-│   │   ├── expenses/        # expenses, categories, receipts
-│   │   └── admin/           # member & role management (parent only)
+│   │   └── ui.js            # shared UI helpers (navbar, escapeHtml, showAlert, getInitials)
+│   ├── services/            # data access — the only files importing supabase.js
+│   │   ├── family-service.js
+│   │   ├── event-service.js
+│   │   ├── expense-service.js
+│   │   └── profile-service.js
+│   ├── pages/                # one <name>-page.js per HTML entry point (page logic)
 │   └── styles/              # global css
-├── pages (root HTML files): index.html, login.html, register.html,
+├── pages (root HTML files): index.html, login.html, register.html, onboarding.html,
 │   dashboard.html, calendar.html, expenses.html, admin.html, profile.html
 └── vite.config.js
 ```
 
-Each module contains: `<name>-service.js` (data access), `<name>-page.js` (page logic), optional component files. HTML pages are thin: they load their page script, nothing else.
+Each domain is a `<name>-service.js` in `src/services/` plus a `<name>-page.js` in `src/pages/` — no per-domain folder grouping (ADR-017). HTML pages are thin: they load their page script, nothing else.
 
 ### Layering rule (non-negotiable)
 
@@ -73,7 +74,7 @@ Permissions are enforced server-side (RLS). UI hiding is a convenience, never th
 - ES modules everywhere; `import`/`export`, no globals.
 - Plain functions over classes unless state genuinely requires it.
 - Files and folders: `kebab-case`. Functions and variables: `camelCase`. DB tables and columns: `snake_case`.
-- All UI text in **English** for V1.
+- All UI text in **Bulgarian** for V1.
 - Dates: always construct local dates from `getFullYear()/getMonth()/getDate()`; never use `toISOString().split('T')[0]` or `new Date("YYYY-MM-DD")` for user-facing dates (timezone shift bug).
 - Bootstrap components and utilities first; custom CSS only when Bootstrap can't do it.
 - Keep functions small; no file should exceed ~200 lines — split into components/services instead.

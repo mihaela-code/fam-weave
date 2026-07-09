@@ -166,3 +166,34 @@ Short ADRs. Format: Context → Decision → Consequences. Newest entries append
 **Decision.** Add an additive `SELECT` policy `profiles_select_family_members` using a new helper `shares_family_with(uuid)` (`security definer`, pinned `search_path`, same pattern as `is_family_member`/`is_family_parent`). The self-select policy remains; permissive policies OR together.
 
 **Consequences.** Any current or future page (dashboard in Day 9) can embed family members' profiles without further policy work. Profiles remain invisible across family boundaries.
+
+---
+
+## ADR-017 — Unified page script convention (`src/pages/*-page.js`)
+
+**Context.** Three coexisting conventions accumulated for where a page's entry script lives: bare files in `src/` (e.g. `src/dashboard.js`), domain folders under `src/modules/<domain>/` (e.g. `src/modules/calendar/calendar-page.js`), and `src/pages/` (introduced for onboarding, then admin). `src/modules/family/` had never gained a service or page file and contained only `.gitkeep`. The inconsistency made "where does a new page's script go" a real question instead of an obvious default.
+
+**Decision.** All page entry scripts live in `src/pages/`, named `<name>-page.js`. `src/modules/` is removed entirely. Final top-level structure under `src/`: `core/` (shared infrastructure), `services/` (data access, the only files importing the Supabase client), `pages/` (page entry points, one per HTML file), `styles/` (global CSS).
+
+**Consequences.** Single obvious location for page code — no more picking between three patterns. Future modules (V2+: inventory, documents, etc.) add a `<name>-service.js` to `services/` and a `<name>-page.js` to `pages/`, not a new top-level folder. `docs/ARCHITECTURE.md` and `.github/copilot-instructions.md` folder-structure diagrams updated to match.
+
+---
+
+## ADR-018 — Centralized `escapeHtml` and hardened `showAlert`
+
+**Context.** Five copies of the same `escapeHtml` function existed: one unexported in `core/ui.js`, and four local copies duplicated across page scripts. `showAlert` injected its `message` argument straight into `innerHTML` unescaped — several call sites pass user-controlled values through it — concretely, the join-family success alert rendered another user's `family.name`, a stored XSS vector between accounts (`error.message` values reached it as well).
+
+**Decision.** `escapeHtml` is exported from `src/core/ui.js` as the single implementation; every page script imports it instead of redefining it. `showAlert` escapes `message` internally before interpolating it, and whitelists the Bootstrap alert `type` against `success`/`danger`/`warning`/`info` (falling back to `danger` for anything else), so a bad `type` value can't break out of the `class` attribute either.
+
+**Consequences.** Callers must not pass pre-built HTML to `showAlert` — it is escaped unconditionally now. Alerts that need rich markup (e.g. the onboarding create-family success alert with an invite-code `<code>` block and a Copy button) bypass `showAlert` and render their own template directly into `alertContainer.innerHTML`, applying `escapeHtml` themselves to any dynamic value (the invite code).
+
+---
+
+## Day 8 polish notes
+
+Not architectural decisions on their own — recorded here so the reasoning isn't lost, without inflating the ADR numbering for house-keeping work.
+
+- **Bulgarian localization pass.** All user-facing strings unified to Bulgarian: UI labels, page titles (`document.title` and static `<title>` tags), validation messages, `confirm()` dialogs, `aria-label`s, `<html lang="bg">` on all 9 pages, and `Intl` locales switched to `bg-BG` (including the calendar's `Intl.DateTimeFormat`, previously `en-GB`).
+- **Onboarding UX.** Page content stays hidden (`d-none`) until the existing-family check resolves, avoiding a flash of the create/join forms for users who already belong to a family. The create-family success state no longer auto-redirects after 3 seconds; it shows a persistent alert with the invite code and a Copy button instead, so the code isn't lost if the user looks away.
+- **Bootstrap import.** `src/core/bootstrap.js` now imports the ESM entry (`import 'bootstrap'`) instead of the prebuilt UMD bundle (`bootstrap/dist/js/bootstrap.bundle.min.js`). This let the admin page's `import { Modal } from 'bootstrap'` share one copy of the library instead of bundling it twice — admin chunk dropped from 84.09 kB to 3.75 kB.
+- **`VITE_SUPABASE_ANON_KEY` naming.** Carried on an earlier deferred-items list; verified already resolved (client env only ever reads `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`, per `docs/ARCHITECTURE.md` "Environment & Deployment"). No change needed.
