@@ -2,7 +2,7 @@ import { APP_NAME } from './config.js';
 import { signOut } from './auth.js';
 import { getProfile } from '../services/profile-service.js';
 
-function escapeHtml(str) {
+export function escapeHtml(str) {
   return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -115,5 +115,6 @@ async function loadNavbarAvatar(container, session) {
 }
 
 export function showAlert(container, message, type = 'danger') {
-  container.innerHTML = `<div class="alert alert-${type}" role="alert">${message}</div>`;
+  const safeType = ['success', 'danger', 'warning', 'info'].includes(type) ? type : 'danger';
+  container.innerHTML = `<div class="alert alert-${safeType}" role="alert">${escapeHtml(message)}</div>`;
 }

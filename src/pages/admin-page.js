@@ -2,7 +2,7 @@ import '../core/bootstrap.js';
 import '../styles/main.css';
 import { Modal } from 'bootstrap';
 import { APP_NAME } from '../core/config.js';
-import { mountNavbar, showAlert, getInitials } from '../core/ui.js';
+import { mountNavbar, showAlert, getInitials, escapeHtml } from '../core/ui.js';
 import { requireAuth, requireFamily } from '../core/auth.js';
 import {
   getFamily,
@@ -12,15 +12,6 @@ import {
 } from '../services/family-service.js';
 
 document.title = `${APP_NAME} — Админ`;
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 function mapError(error) {
   const message = error.message || '';

@@ -1,7 +1,7 @@
 import '../core/bootstrap.js';
 import '../styles/main.css';
 import { APP_NAME } from '../core/config.js';
-import { mountNavbar, showAlert } from '../core/ui.js';
+import { mountNavbar, showAlert, escapeHtml } from '../core/ui.js';
 import { requireAuth, requireFamily } from '../core/auth.js';
 import {
   getCategories,
@@ -13,15 +13,6 @@ import {
 } from '../services/expense-service.js';
 
 document.title = `${APP_NAME} — Разходи`;
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 function mapError(error) {
   const message = error.message || '';

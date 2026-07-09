@@ -1,20 +1,11 @@
 import '../core/bootstrap.js';
 import '../styles/main.css';
 import { APP_NAME } from '../core/config.js';
-import { mountNavbar, showAlert, getInitials } from '../core/ui.js';
+import { mountNavbar, showAlert, getInitials, escapeHtml } from '../core/ui.js';
 import { requireAuth, requireFamily } from '../core/auth.js';
 import { getProfile, uploadAvatar, downloadAvatar } from '../services/profile-service.js';
 
 document.title = `${APP_NAME} — Profile`;
-
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
 
 function mapError() {
   return 'Something went wrong. Please try again.';
