@@ -184,7 +184,7 @@ if (session) {
 
         if (deleteBtn) {
           const id = deleteBtn.dataset.id;
-          const confirmed = confirm('Сигурна ли си, че искаш да изтриеш този разход?');
+          const confirmed = confirm('Сигурни ли сте, че искате да изтриете този разход?');
           if (!confirmed) return;
 
           try {

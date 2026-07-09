@@ -5,7 +5,7 @@ import { mountNavbar, showAlert } from '../core/ui.js';
 import { requireAuth, getMyFamily } from '../core/auth.js';
 import { createFamily, joinFamilyByCode } from '../services/family-service.js';
 
-document.title = `${APP_NAME} — Onboarding`;
+document.title = `${APP_NAME} — Добре дошли`;
 document.getElementById('pageTitle').textContent = `Добре дошли в ${APP_NAME}`;
 
 const session = await requireAuth();

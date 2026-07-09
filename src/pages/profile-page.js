@@ -5,10 +5,10 @@ import { mountNavbar, showAlert, getInitials, escapeHtml } from '../core/ui.js';
 import { requireAuth, requireFamily } from '../core/auth.js';
 import { getProfile, uploadAvatar, downloadAvatar } from '../services/profile-service.js';
 
-document.title = `${APP_NAME} — Profile`;
+document.title = `${APP_NAME} — Профил`;
 
 function mapError() {
-  return 'Something went wrong. Please try again.';
+  return 'Възникна грешка. Опитайте отново.';
 }
 
 const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
@@ -73,21 +73,21 @@ if (session) {
       const file = avatarFileInput.files[0];
 
       if (!file) {
-        showAlert(alertContainer, 'Please choose an image file.');
+        showAlert(alertContainer, 'Моля, изберете файл с изображение.');
         return;
       }
       if (!file.type.startsWith('image/')) {
-        showAlert(alertContainer, 'File must be an image.');
+        showAlert(alertContainer, 'Файлът трябва да е изображение.');
         return;
       }
       if (file.size > MAX_AVATAR_SIZE) {
-        showAlert(alertContainer, 'Image must be 2MB or smaller.');
+        showAlert(alertContainer, 'Изображението трябва да е до 2MB.');
         return;
       }
 
       const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
       if (!ALLOWED_EXTENSIONS.includes(ext)) {
-        showAlert(alertContainer, 'Allowed image types: jpg, jpeg, png, webp, gif.');
+        showAlert(alertContainer, 'Разрешени формати: jpg, jpeg, png, webp, gif.');
         return;
       }
 
@@ -97,7 +97,7 @@ if (session) {
       try {
         const avatarUrl = await uploadAvatar(session.user.id, file, ext);
         renderAvatar(avatarUrl);
-        showAlert(alertContainer, 'Avatar updated successfully.', 'success');
+        showAlert(alertContainer, 'Аватарът е обновен успешно.', 'success');
         avatarForm.reset();
       } catch (error) {
         console.error(error);

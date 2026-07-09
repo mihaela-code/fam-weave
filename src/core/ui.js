@@ -22,11 +22,11 @@ export function getInitials(displayName) {
 }
 
 const NAV_LINKS = [
-  { id: 'dashboard', label: 'Dashboard', href: 'dashboard.html' },
-  { id: 'calendar', label: 'Calendar', href: 'calendar.html' },
-  { id: 'expenses', label: 'Expenses', href: 'expenses.html' },
+  { id: 'dashboard', label: 'Табло', href: 'dashboard.html' },
+  { id: 'calendar', label: 'Календар', href: 'calendar.html' },
+  { id: 'expenses', label: 'Разходи', href: 'expenses.html' },
   { id: 'admin', label: 'Админ', href: 'admin.html', parentOnly: true },
-  { id: 'profile', label: 'Profile', href: 'profile.html' },
+  { id: 'profile', label: 'Профил', href: 'profile.html' },
 ];
 
 export function renderNavbar(activePage = '', hasSession = false, isParent = false) {
@@ -43,7 +43,7 @@ export function renderNavbar(activePage = '', hasSession = false, isParent = fal
 
   const authControls = hasSession
     ? `
-      <a href="profile.html" class="me-2 text-decoration-none" id="navbarAvatarLink" aria-label="Profile">
+      <a href="profile.html" class="me-2 text-decoration-none" id="navbarAvatarLink" aria-label="Профил">
         <span
           class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center"
           style="width: 32px; height: 32px; font-size: 0.8rem"
@@ -51,22 +51,22 @@ export function renderNavbar(activePage = '', hasSession = false, isParent = fal
         >?</span>
         <img
           src=""
-          alt="Avatar"
+          alt="Аватар"
           class="rounded-circle d-none"
           style="width: 32px; height: 32px; object-fit: cover"
           id="navbarAvatarImage"
         />
       </a>
-      <a class="btn btn-outline-light" id="logoutBtn" href="#">Log out</a>`
+      <a class="btn btn-outline-light" id="logoutBtn" href="#">Изход</a>`
     : `
-      <a class="btn btn-outline-light me-2" href="login.html">Log In</a>
-      <a class="btn btn-light" href="register.html">Register</a>`;
+      <a class="btn btn-outline-light me-2" href="login.html">Вход</a>
+      <a class="btn btn-light" href="register.html">Регистрация</a>`;
 
   return `
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container-fluid">
         <a class="navbar-brand" href="dashboard.html">${APP_NAME}</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Превключи навигацията">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mainNav">

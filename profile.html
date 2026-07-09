@@ -1,24 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="bg">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profile</title>
+    <title>FamWeave — Профил</title>
   </head>
   <body>
     <div id="navbar"></div>
     <main class="container py-4">
-      <h1>Profile</h1>
+      <h1>Профил</h1>
       <div id="alertContainer"></div>
 
       <div class="card" style="max-width: 480px">
         <div class="card-body">
-          <h2 class="h5 card-title">Avatar</h2>
+          <h2 class="h5 card-title">Аватар</h2>
           <div class="mb-3" style="width: 128px; height: 128px">
             <img
               src=""
-              alt="Avatar"
+              alt="Аватар"
               class="rounded-circle d-none"
               style="width: 128px; height: 128px; object-fit: cover"
               id="avatarImage"
@@ -36,11 +36,11 @@
               aria-hidden="true"
               id="downloadAvatarSpinner"
             ></span>
-            Download
+            Свали
           </button>
           <form id="avatarForm" novalidate>
             <div class="mb-3">
-              <label for="avatarFileInput" class="form-label">Choose image</label>
+              <label for="avatarFileInput" class="form-label">Избери изображение</label>
               <input type="file" class="form-control" id="avatarFileInput" accept="image/*" />
             </div>
             <button type="submit" class="btn btn-primary" id="uploadAvatarBtn">
@@ -50,7 +50,7 @@
                 aria-hidden="true"
                 id="uploadAvatarSpinner"
               ></span>
-              Upload
+              Качи
             </button>
           </form>
         </div>

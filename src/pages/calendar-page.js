@@ -5,13 +5,13 @@ import { mountNavbar, showAlert, escapeHtml } from '../core/ui.js';
 import { requireAuth, requireFamily } from '../core/auth.js';
 import { getEvents, createEvent, updateEvent, deleteEvent } from '../services/event-service.js';
 
-document.title = `${APP_NAME} — Calendar`;
+document.title = `${APP_NAME} — Календар`;
 
 function mapError() {
-  return 'Something went wrong. Please try again.';
+  return 'Възникна грешка. Опитайте отново.';
 }
 
-const dateTimeFormatter = new Intl.DateTimeFormat('en-GB', {
+const dateTimeFormatter = new Intl.DateTimeFormat('bg-BG', {
   dateStyle: 'medium',
   timeStyle: 'short',
 });
@@ -89,7 +89,7 @@ if (session) {
       endsAtInput.value = event.ends_at ? toDateTimeLocalValue(event.ends_at) : '';
       descriptionInput.value = event.description ?? '';
       editWarning.classList.remove('d-none');
-      addEventBtnLabel.textContent = 'Save changes';
+      addEventBtnLabel.textContent = 'Запази';
       eventForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
@@ -97,7 +97,7 @@ if (session) {
       editingEventId = null;
       eventForm.reset();
       editWarning.classList.add('d-none');
-      addEventBtnLabel.textContent = 'Add event';
+      addEventBtnLabel.textContent = 'Добави събитие';
     }
 
     async function loadEvents() {
@@ -120,7 +120,7 @@ if (session) {
                   type="button"
                   class="btn btn-sm btn-outline-secondary me-1 edit-event-btn"
                   data-id="${event.id}"
-                  aria-label="Edit"
+                  aria-label="Редактирай"
                 >
                   <i class="bi bi-pencil"></i>
                 </button>
@@ -128,7 +128,7 @@ if (session) {
                   type="button"
                   class="btn btn-sm btn-outline-danger delete-event-btn"
                   data-id="${event.id}"
-                  aria-label="Delete"
+                  aria-label="Изтрий"
                 >
                   <i class="bi bi-trash"></i>
                 </button>
@@ -173,7 +173,7 @@ if (session) {
 
         if (deleteBtn) {
           const id = deleteBtn.dataset.id;
-          const confirmed = confirm('Are you sure you want to delete this event?');
+          const confirmed = confirm('Сигурни ли сте, че искате да изтриете това събитие?');
           if (!confirmed) return;
 
           try {
@@ -181,7 +181,7 @@ if (session) {
             if (editingEventId === id) {
               exitEditMode();
             }
-            showSuccessAlert('Event deleted.');
+            showSuccessAlert('Събитието е изтрито.');
             await loadEvents();
           } catch (error) {
             console.error(error);
@@ -199,11 +199,11 @@ if (session) {
         const endsAtValue = endsAtInput.value;
 
         if (!title) {
-          showAlert(alertContainer, 'Title is required.');
+          showAlert(alertContainer, 'Заглавието е задължително.');
           return;
         }
         if (!startsAtValue) {
-          showAlert(alertContainer, 'Start time is required.');
+          showAlert(alertContainer, 'Началото е задължително.');
           return;
         }
 
@@ -211,7 +211,7 @@ if (session) {
         const endsAt = endsAtValue ? new Date(endsAtValue) : null;
 
         if (endsAt && endsAt <= startsAt) {
-          showAlert(alertContainer, 'End time must be after start time.');
+          showAlert(alertContainer, 'Крайният час трябва да е след началния.');
           return;
         }
 
@@ -235,7 +235,7 @@ if (session) {
           }
 
           exitEditMode();
-          showSuccessAlert(isEditing ? 'Event updated.' : 'Event added successfully.');
+          showSuccessAlert(isEditing ? 'Събитието е обновено.' : 'Събитието е добавено успешно.');
           await loadEvents();
         } catch (error) {
           console.error(error);

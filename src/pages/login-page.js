@@ -4,7 +4,7 @@ import { APP_NAME } from '../core/config.js';
 import { mountNavbar, showAlert } from '../core/ui.js';
 import { signIn, redirectIfAuthenticated } from '../core/auth.js';
 
-document.title = `${APP_NAME} — Log In`;
+document.title = `${APP_NAME} — Вход`;
 
 const session = await redirectIfAuthenticated();
 if (!session) {
@@ -22,7 +22,7 @@ form.addEventListener('submit', async (event) => {
   const password = document.getElementById('password').value;
 
   if (!email || !password) {
-    showAlert(alertContainer, 'Please fill in all fields.');
+    showAlert(alertContainer, 'Моля, попълнете всички полета.');
     return;
   }
 
