@@ -9,8 +9,56 @@
   <body>
     <div id="navbar"></div>
     <main class="container py-4">
-      <h1>Табло</h1>
-      <p id="familySubtitle" class="text-muted"></p>
+      <div id="alertContainer"></div>
+      <div id="dashboardContent" class="d-none">
+        <h1 id="greeting"></h1>
+        <p id="familySubtitle" class="text-muted"></p>
+
+        <div id="pageLoadingSpinner" class="text-center py-5">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Зареждане...</span>
+          </div>
+        </div>
+
+        <div class="row g-4 mt-2 d-none" id="dashboardCardsRow">
+          <div class="col-12 col-md-6 col-lg-4">
+            <a href="calendar.html" class="text-decoration-none text-reset">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h2 class="h5 card-title">Предстоящи събития</h2>
+                  <ul class="list-unstyled mb-0" id="upcomingEventsList"></ul>
+                  <p class="text-muted mb-0 d-none" id="upcomingEventsEmpty">Няма предстоящи събития.</p>
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <div class="col-12 col-md-6 col-lg-4">
+            <a href="expenses.html" class="text-decoration-none text-reset">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h2 class="h5 card-title">Последни разходи</h2>
+                  <ul class="list-unstyled mb-0" id="recentExpensesList"></ul>
+                  <p class="text-muted mb-0 d-none" id="recentExpensesEmpty">Няма въведени разходи.</p>
+                  <p class="mt-2 mb-0" id="monthTotalLabel"></p>
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <div class="col-12 col-md-6 col-lg-4">
+            <a href="admin.html" class="text-decoration-none text-reset" id="membersCardLink">
+              <div class="card h-100">
+                <div class="card-body">
+                  <h2 class="h5 card-title">Членове</h2>
+                  <p class="display-6 mb-0" id="membersCount"></p>
+                  <p class="text-muted mb-0 d-none" id="membersEmpty">Няма членове.</p>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
     </main>
     <script type="module" src="/src/pages/dashboard-page.js"></script>
   </body>

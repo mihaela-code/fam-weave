@@ -35,6 +35,18 @@ export async function getExpenses(familyId) {
   return data;
 }
 
+export async function getExpensesByDateRange(familyId, fromDate, toDate) {
+  const { data, error } = await supabase
+    .from('expenses')
+    .select('amount')
+    .eq('family_id', familyId)
+    .gte('spent_on', fromDate)
+    .lt('spent_on', toDate);
+
+  if (error) throw error;
+  return data;
+}
+
 export async function updateExpense(id, { categoryId, amount, description, spentOn }) {
   const { data, error } = await supabase
     .from('expenses')
